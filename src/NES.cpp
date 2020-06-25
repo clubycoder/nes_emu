@@ -1,0 +1,108 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+#include <stdint.h>
+
+#include <SDL2/SDL.h>
+
+using namespace std;
+
+const int NES_SCREEN_WIDTH = 256;
+const int NES_SCREEN_HEIGHT = 240;
+const int NES_SCREEN_SCALE = 3;
+
+SDL_Window *window = NULL;
+SDL_Renderer *renderer = NULL;
+SDL_Texture *screen = NULL;
+
+int main(int arg, char *argv[]) {
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
+
+    window = SDL_CreateWindow(
+        "Nintendo Entertainment System",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        NES_SCREEN_WIDTH * NES_SCREEN_SCALE,
+        NES_SCREEN_HEIGHT * NES_SCREEN_SCALE,
+        SDL_WINDOW_SHOWN
+    );
+    if (!window) {
+        cerr << "ERROR: Unable to create window!" << endl;
+        return 1;
+    }
+
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        cerr << "ERROR: Unable to create renderer!" << endl;
+        return 2;
+    }
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "nearest"); 
+	SDL_RenderSetLogicalSize(renderer, NES_SCREEN_WIDTH, NES_SCREEN_HEIGHT);
+
+    screen = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        NES_SCREEN_WIDTH,
+        NES_SCREEN_HEIGHT
+    );
+    if (!screen) {
+        cerr << "ERROR: Unable to create screen texture!" << endl;
+        return 3;
+    }
+
+    bool done = false;
+    int pass = 0;
+    while (!done) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event) != 0) {
+            switch (event.type) {
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        done = true;
+                    }
+                    break;
+                case SDL_QUIT:
+                    done = true;
+                    break;
+            }
+		}
+
+        if (!done) {
+            void *screen_pixels;
+            int screen_pitch;
+            if (SDL_LockTexture(screen, NULL, &screen_pixels, &screen_pitch) < 0) {
+                cerr << "ERROR: Unable to lock screen texture!" << endl;
+                return 4;
+            }
+            for (int y = 0; y < NES_SCREEN_HEIGHT; y++) {
+                uint32_t *screen_row = (uint32_t *)((uint8_t *)screen_pixels + y * screen_pitch);
+                for (int x = 0; x < NES_SCREEN_WIDTH; x++) {
+                    uint8_t pixel_red = y;
+                    uint8_t pixel_green = x;
+                    uint8_t pixel_blue = y * x + pass;
+                    *(screen_row + x) = (
+                        0xFF000000L |
+                        ((uint32_t)pixel_red & 0xFF) << 16 |
+                        ((uint32_t)pixel_green & 0xFF) << 8 |
+                        ((uint32_t)pixel_blue & 0xFF)
+                    );
+                }
+            }
+            pass++;
+            SDL_UnlockTexture(screen);
+
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, screen, NULL, NULL);
+            SDL_RenderPresent(renderer);
+        }
+    }
+
+    SDL_DestroyTexture(screen);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
+}

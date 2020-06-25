@@ -1,0 +1,57 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Build NES Emulator for Debug",
+			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
+			"args": [
+				"-g",
+				"${workspaceFolder}\\src\\*.cpp",
+				"-o",
+				"${workspaceFolder}\\build\\debug\\NES.exe",
+				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
+				"-lmingw32",
+				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
+                "-lSDL2main",
+                "-lSDL2",
+                "-mwindows"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Build NES Emulator for Release",
+			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
+			"args": [
+				"${workspaceFolder}\\src\\*.cpp",
+				"-o",
+				"${workspaceFolder}\\build\\release\\NES.exe",
+				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
+				"-lmingw32",
+				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
+                "-lSDL2main",
+                "-lSDL2",
+                "-mwindows"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build"
+			}
+		}
+	]
+}
