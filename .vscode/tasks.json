@@ -4,19 +4,11 @@
 		{
 			"type": "shell",
 			"label": "WIN - Build NES Emulator for Debug",
-			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
+			"command": "E:\\devel\\make\\bin\\make.exe",
 			"args": [
-				"-g",
-				"${workspaceFolder}\\src\\*.cpp",
-				"-o",
-				"${workspaceFolder}\\build\\debug\\NES.exe",
-				"-Isrc",
-				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
-				"-lmingw32",
-				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
-				"-lSDL2main",
-				"-lSDL2",
-				"-mwindows"
+				"-f",
+				"Makefile.win",
+				"DEBUG=1"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -32,17 +24,10 @@
 		{
 			"type": "shell",
 			"label": "WIN - Build NES Emulator for Release",
-			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
+			"command": "E:\\devel\\make\\bin\\make.exe",
 			"args": [
-				"${workspaceFolder}\\src\\*.cpp",
-				"-o",
-				"${workspaceFolder}\\build\\release\\NES.exe",
-				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
-				"-lmingw32",
-				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
-				"-lSDL2main",
-				"-lSDL2",
-				"-mwindows"
+				"-f",
+				"Makefile.win"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -54,30 +39,38 @@
 				"kind": "build"
 			}
 		}, {
-      "type": "shell",
-      "label": "MAC - Build NES Emulator for Debug",
-      "command": "/usr/bin/clang++",
-      "args": [
-        "-std=c++17",
-        "-stdlib=libc++",
-        "-g",
-				"${workspaceFolder}/src/*.cpp",
-        "-o",
-				"${workspaceFolder}/build/debug/NES",
-				"-D_THREAD_SAFE",
-				"-Isrc",
-				"-I/usr/local/include/SDL2",
-        "-lSDL2main",
-        "-lSDL2",
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    }
+			"type": "shell",
+			"label": "MAC - Build NES Emulator for Debug",
+			"command": "make",
+			"args": [
+				"-f",
+				"Makefile.mac",
+				"DEBUG=1"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": ["$gcc"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}, {
+			"type": "shell",
+			"label": "MAC - Build NES Emulator for Release",
+			"command": "make",
+			"args": [
+				"-f",
+				"Makefile.mac"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": ["$gcc"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
 	]
 }

@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Build and debug NES Emulator",
+            "name": "WIN - Build and debug NES Emulator",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\build\\debug\\NES.exe",
@@ -23,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "Build NES Emulator for Debug"
+            "preLaunchTask": "WIN - Build NES Emulator for Debug"
         }
     ]
 }

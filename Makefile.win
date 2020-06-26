@@ -1,2 +1,65 @@
-CXX=
-CXXFLAGS=
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+MKDIR := mkdir
+RM := del /Q /S /F
+
+SRC_DIR=src
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+	BUILD_DIR=build/debug
+	DEBUG_FLAGS=-g -DDEBUG
+else
+	BUILD_DIR=build/release
+endif
+
+CXX := E:\devel\mingw64-x86_64\mingw64\bin\g++.exe
+CXXFLAGS := \
+	-c \
+	$(DEBUG_FLAGS) \
+    -mwindows
+INCLUDES := \
+	-Isrc \
+    -IE:\devel\SDL2\x86_64-w64-mingw32\include
+LD := E:\devel\mingw64-x86_64\mingw64\bin\g++.exe
+LDFLAGS := \
+	$(DEBUG_FLAGS) \
+    -mwindows
+LIBS := \
+    -LE:\devel\SDL2\x86_64-w64-mingw32\lib \
+	-lmingw32 \
+	-lSDL2main \
+	-lSDL2
+
+OBJ_DIR := $(BUILD_DIR)/obj
+SRC_FILES := $(call rwildcard,$(SRC_DIR),*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
+BUILD_DIRS := $(dir $(OBJ_FILES))
+
+APP := $(BUILD_DIR)/NES.exe
+
+.PHONY: all
+all: config filesystem $(APP)
+
+.PHONY: config
+config:
+	@echo $(OBJ_FILES)
+
+.PHONY: filesystem
+filesystem:
+	$(MKDIR) $(subst /,\,$(BUILD_DIR)) & \
+	$(MKDIR) $(subst /,\,$(OBJ_DIR)) & \
+	$(foreach dir,$(BUILD_DIRS),$(MKDIR) $(subst /,\,$(dir)) &)
+
+.PHONY: clean
+clean:
+	$(RM) $(subst /,\,$(BUILD_DIR))
+
+$(APP): $(OBJ_FILES)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+$(OBJ_DIR)/NES.o: $(SRC_DIR)/NES.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)
