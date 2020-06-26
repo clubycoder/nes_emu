@@ -1,0 +1,69 @@
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+MKDIR := mkdir -p
+RM := rm -Rf
+
+SRC_DIR=src
+
+DEBUG ?= 1
+ifeq ($(DEBUG), 1)
+	BUILD_DIR=build/debug
+	DEBUG_FLAGS=-g -DDEBUG
+else
+	BUILD_DIR=build/release
+endif
+
+CXX := /usr/bin/clang++
+CXXFLAGS := \
+	-c \
+	$(DEBUG_FLAGS) \
+	-D_THREAD_SAFE \
+	-std=c++17 \
+	-stdlib=libc++
+INCLUDES := \
+	-Isrc \
+	-I/usr/local/include/SDL2
+LD := /usr/bin/clang++
+LDFLAGS := \
+	-g \
+	-std=c++17 \
+	-stdlib=libc++
+LIBS := \
+	-lSDL2main \
+	-lSDL2
+
+OBJ_DIR := $(BUILD_DIR)/obj
+SRC_FILES := $(call rwildcard,$(SRC_DIR),*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
+
+FILESYSTEM := \
+	$(BUILD_DIR) \
+	$(OBJ_DIR)
+
+APP := $(BUILD_DIR)/NES
+
+.PHONY: all
+all: config $(FILESYSTEM) $(APP)
+
+.PHONY: config
+config:
+	@echo $(OBJ_FILES)
+
+.PHONY: clean
+clean:
+	$(RM) $(BUILD_DIR)
+
+$(BUILD_DIR):
+	$(MKDIR) $@
+
+$(OBJ_DIR):
+	$(MKDIR) $@
+
+$(APP): $(OBJ_FILES)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+$(OBJ_DIR)/NES.o: $(SRC_DIR)/NES.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)

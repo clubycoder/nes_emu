@@ -3,19 +3,20 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"label": "Build NES Emulator for Debug",
+			"label": "WIN - Build NES Emulator for Debug",
 			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-g",
 				"${workspaceFolder}\\src\\*.cpp",
 				"-o",
 				"${workspaceFolder}\\build\\debug\\NES.exe",
+				"-Isrc",
 				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
 				"-lmingw32",
 				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
-                "-lSDL2main",
-                "-lSDL2",
-                "-mwindows"
+				"-lSDL2main",
+				"-lSDL2",
+				"-mwindows"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -30,7 +31,7 @@
 		},
 		{
 			"type": "shell",
-			"label": "Build NES Emulator for Release",
+			"label": "WIN - Build NES Emulator for Release",
 			"command": "E:\\devel\\mingw64-x86_64\\mingw64\\bin\\g++.exe",
 			"args": [
 				"${workspaceFolder}\\src\\*.cpp",
@@ -39,9 +40,9 @@
 				"-IE:\\devel\\SDL2\\x86_64-w64-mingw32\\include",
 				"-lmingw32",
 				"-LE:\\devel\\SDL2\\x86_64-w64-mingw32\\lib",
-                "-lSDL2main",
-                "-lSDL2",
-                "-mwindows"
+				"-lSDL2main",
+				"-lSDL2",
+				"-mwindows"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -52,6 +53,31 @@
 			"group": {
 				"kind": "build"
 			}
-		}
+		}, {
+      "type": "shell",
+      "label": "MAC - Build NES Emulator for Debug",
+      "command": "/usr/bin/clang++",
+      "args": [
+        "-std=c++17",
+        "-stdlib=libc++",
+        "-g",
+				"${workspaceFolder}/src/*.cpp",
+        "-o",
+				"${workspaceFolder}/build/debug/NES",
+				"-D_THREAD_SAFE",
+				"-Isrc",
+				"-I/usr/local/include/SDL2",
+        "-lSDL2main",
+        "-lSDL2",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
 	]
 }
