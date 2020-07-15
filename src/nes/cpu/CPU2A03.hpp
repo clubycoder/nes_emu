@@ -37,20 +37,30 @@ Links:
 #include <memory>
 
 #include <nes/Component.hpp>
-#include <nes/Bus.hpp>
+
+// Forward declaration for Bus
+namespace nes {
+
+class Bus;
+
+} // nes
 
 namespace nes { namespace cpu {
 
 class CPU2A03 : public Component {
 public:
-    virtual void reset();
+    void reset() override;
 
-    virtual void clock();
+    void clock() override;
 
-    void connect_bus(std::shared_ptr<Bus> bus);
+    void connect_bus(std::shared_ptr<nes::Bus> bus);
 	
 	void irq(); // Interrupt Request - Executes an instruction at a specific location
 	void nmi(); // Non-Maskable Interrupt Request - As above, but cannot be disabled
+
+    // Fill out Component requirements with stubs for CPU read/write
+    const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override { return false; };
+    const bool cpu_write(const uint16_t addr, const uint8_t data) override { return false; };
 
 private:
     std::shared_ptr<nes::Bus> m_bus;

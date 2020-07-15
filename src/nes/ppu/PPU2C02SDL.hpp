@@ -38,24 +38,24 @@ namespace nes { namespace ppu {
 
 class PPU2C02SDL : public PPU2C02 {
 public:
-    PPU2C02SDL(SDL_Renderer *renderer) : PPU2C02() {
+    PPU2C02SDL(const SDL_Renderer *renderer) : PPU2C02() {
         setup_screen_texture(renderer);
     };
     ~PPU2C02SDL();
 
     const SDL_Texture *get_screen_texture() const;
 
-protected:
-    virtual void open_screen();
-    virtual void close_screen();
-    virtual void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
+public: // TODO: Change to protected
+    void open_screen() override;
+    void close_screen() override;
+    void set_pixel(const int x, const int y, const uint8_t r, const uint8_t g, const uint8_t b) override;
 
 private:
     SDL_Texture *m_screen_texture;
     int m_screen_pitch;
     void *m_screen_pixels;
 
-    void setup_screen_texture(SDL_Renderer *renderer);
+    void setup_screen_texture(const SDL_Renderer *renderer);
 
 };
 

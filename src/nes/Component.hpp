@@ -34,7 +34,10 @@ class Component {
 public:
     virtual void reset() = 0;
 
-    virtual void clock() = 0;
+    virtual void clock() {};
+
+    virtual const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) = 0;
+    virtual const bool cpu_write(const uint16_t addr, const uint8_t data) = 0;
 
 private:
 

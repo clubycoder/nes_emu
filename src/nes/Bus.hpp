@@ -37,6 +37,7 @@ the components
 #include <nes/ram/Ram.hpp>
 #include <nes/ppu/PPU2C02.hpp>
 #include <nes/apu/APURP2A03.hpp>
+#include <nes/controller/Controller.hpp>
 #include <nes/cart/Cart.hpp>
 
 namespace nes {
@@ -47,22 +48,24 @@ public:
         std::shared_ptr<nes::cpu::CPU2A03> cpu,
         std::shared_ptr<nes::ram::Ram> ram,
         std::shared_ptr<nes::ppu::PPU2C02> ppu,
-        std::shared_ptr<nes::apu::APURP2A03> apu
+        std::shared_ptr<nes::apu::APURP2A03> apu,
+        std::shared_ptr<nes::controller::Controller> controller
     )
         : m_cpu(cpu)
         , m_ram(ram)
         , m_ppu(ppu)
-        , m_apu(apu) {
+        , m_apu(apu)
+        , m_controller(controller) {
     }
 
-    virtual void reset();
+    void reset() override;
 
-    virtual void clock();
+    void clock() override;
 
     void load_cart(std::shared_ptr<nes::cart::Cart> cart);
 
-    uint8_t cpu_read(const uint16_t addr);
-    void cpu_write(const uint16_t addr, const uint8_t data);
+    const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override;
+    const bool cpu_write(const uint16_t addr, const uint8_t data) override;
 
 private:
     const uint16_t ADDR_RAM_BEGIN = 0x0000; const uint16_t ADDR_RAM_END = 0x1FFF;
@@ -76,6 +79,7 @@ private:
     std::shared_ptr<nes::ram::Ram> m_ram;
     std::shared_ptr<nes::ppu::PPU2C02> m_ppu;
     std::shared_ptr<nes::apu::APURP2A03> m_apu;
+    std::shared_ptr<nes::controller::Controller> m_controller;
     std::shared_ptr<nes::cart::Cart> m_cart;
 };
 

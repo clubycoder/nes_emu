@@ -39,15 +39,14 @@ void Ram::reset() {
     std::fill(m_data.begin(), m_data.begin(), 0x00);
 }
 
-void Ram::clock() {
+const bool Ram::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = m_data[addr & (SIZE - 1)];
+    return true;
 }
 
-const uint8_t Ram::cpu_read(const uint16_t addr) const {
-    return m_data[addr & (SIZE - 1)];
-};
-
-void Ram::cpu_write(const uint16_t addr, const uint8_t data) {
+const bool Ram::cpu_write(const uint16_t addr, const uint8_t data) {
     m_data[addr & (SIZE - 1)] = data;
+    return true;
 }
 
 }} // nes::ram

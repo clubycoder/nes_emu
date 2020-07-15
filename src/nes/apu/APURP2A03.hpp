@@ -34,16 +34,18 @@ Links:
 
 #include <cstdint>
 
+#include <nes/Component.hpp>
+
 namespace nes { namespace apu {
 
-class APURP2A03 {
+class APURP2A03 : public Component {
 public:
-    void reset();
+    void reset() override;
 
-    void clock();
+    void clock() override;
 
-    void cpu_write(uint16_t addr, uint8_t data);
-    uint8_t cpu_read(uint16_t addr);
+    const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override;
+    const bool cpu_write(const uint16_t addr, const uint8_t data) override;
 
 protected:
 

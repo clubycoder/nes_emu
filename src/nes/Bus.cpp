@@ -27,11 +27,28 @@ Emulation of the bus for the Nintendo Entertainment System that connects all of
 the components
 *******************************************************************************/
 
+#include <memory>
+
 #include <nes/Bus.hpp>
 
 namespace nes {
 
 void Bus::reset() {
+    if (m_cart != nullptr) {
+        m_cart->reset();
+    }
+    if (m_cpu != nullptr) {
+        m_cpu->reset();
+    }
+    if (m_ram != nullptr) {
+        m_ram->reset();
+    }
+    if (m_ppu != nullptr) {
+        m_ppu->reset();
+    }
+    if (m_apu != nullptr) {
+        m_apu->reset();
+    }
 }
 
 void Bus::clock() {
@@ -49,36 +66,44 @@ void Bus::load_cart(std::shared_ptr<nes::cart::Cart> cart) {
     reset();
 }
 
-uint8_t Bus::cpu_read(const uint16_t addr) {
-    uint8_t data = 0x00;
+const bool Bus::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = 0x00;
 
     // Give the cartridge / mapper the chance to handle the read
     if (!m_cart->cpu_read(addr, data)) {
         if (addr >= ADDR_RAM_BEGIN && addr <= ADDR_RAM_END) {
-            data = m_ram->cpu_read(addr);
+            return m_ram->cpu_read(addr, data, read_only);
         } else if (addr <= ADDR_PPU_BEGIN && addr <= ADDR_PPU_END) {
-            data = m_ppu->cpu_read(addr);
+            return m_ppu->cpu_read(addr, data, read_only);
         } else if (addr == ADDR_APU_STATUS) {
-            data = m_apu->cpu_read(addr);
+            return m_apu->cpu_read(addr, data, read_only);
         } else if (addr <= ADDR_CONTROLLER_BEGIN && addr <= ADDR_CONTROLLER_END) {
+            return m_controller->cpu_read(addr, data, read_only);
         }
+    } else {
+        return true;
     }
 
-    return data;
+    return false;
 }
 
-void Bus::cpu_write(const uint16_t addr, const uint8_t data) {
+const bool Bus::cpu_write(const uint16_t addr, const uint8_t data) {
     // Give the cartridge / mapper the chance to handle the write
     if (!m_cart->cpu_write(addr, data)) {
         if (addr >= ADDR_RAM_BEGIN && addr <= ADDR_RAM_END) {
-            m_ram->cpu_write(addr, data);
+            return m_ram->cpu_write(addr, data);
         } else if (addr <= ADDR_PPU_BEGIN && addr <= ADDR_PPU_END) {
-            m_ppu->cpu_write(addr, data);
+            return m_ppu->cpu_write(addr, data);
         } else if ((addr <= ADDR_APU_BEGIN && addr <= ADDR_APU_END) || addr == ADDR_APU_STATUS || addr == ADDR_APU_FRAME_COUNTER) {
-            m_apu->cpu_write(addr, data);
+            return m_apu->cpu_write(addr, data);
         } else if (addr <= ADDR_CONTROLLER_BEGIN && addr <= ADDR_CONTROLLER_END) {
+            return m_controller->cpu_write(addr, data);
         }
+    } else {
+        return true;
     }
+
+    return false;
 }
 
-}
+} // nes

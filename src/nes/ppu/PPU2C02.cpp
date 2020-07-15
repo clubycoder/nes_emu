@@ -42,4 +42,14 @@ void PPU2C02::reset() {
 void PPU2C02::clock() {
 }
 
+const bool PPU2C02::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = 0x00;
+
+    return true;
+}
+
+const bool PPU2C02::cpu_write(const uint16_t addr, const uint8_t data) {
+    return true;
+}
+
 }} // nes::ppu

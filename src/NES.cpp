@@ -29,6 +29,7 @@ Links:
 - https://wiki.nesdev.com/w/index.php/Nesdev
 *******************************************************************************/
 
+#include <memory>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -36,6 +37,11 @@ Links:
 
 #include <SDL2/SDL.h>
 
+#include <nes/Bus.hpp>
+#include <nes/cpu/CPU2A03.hpp>
+#include <nes/ram/Ram.hpp>
+#include <nes/ppu/PPU2C02SDL.hpp>
+#include <nes/apu/APURP2A03SDL.hpp>
 #include <nes/cart/Cart.hpp>
 
 using namespace std;
@@ -49,10 +55,6 @@ SDL_Renderer *renderer = NULL;
 SDL_Texture *screen = NULL;
 
 int main(int argc, char *argv[]) {
-    auto cart = argc > 1 ? nes::cart::Cart(argv[1]) : nes::cart::Cart("roms/donkey_kong.nes");
-    std::cout << cart << std::endl;
-
-
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
 
     window = SDL_CreateWindow(
@@ -73,20 +75,24 @@ int main(int argc, char *argv[]) {
         cerr << "ERROR: Unable to create renderer!" << endl;
         return 2;
     }
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "nearest"); 
-	SDL_RenderSetLogicalSize(renderer, NES_SCREEN_WIDTH, NES_SCREEN_HEIGHT);
 
-    screen = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        NES_SCREEN_WIDTH,
-        NES_SCREEN_HEIGHT
-    );
-    if (!screen) {
-        cerr << "ERROR: Unable to create screen texture!" << endl;
-        return 3;
-    }
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "nearest"); 
+	SDL_RenderSetLogicalSize(renderer, nes::ppu::PPU2C02::SCREEN_WIDTH, nes::ppu::PPU2C02::SCREEN_HEIGHT);
+
+    auto cpu = std::make_shared<nes::cpu::CPU2A03>();
+    auto ram = std::make_shared<nes::ram::Ram>();
+    auto ppu = std::make_shared<nes::ppu::PPU2C02SDL>(renderer);
+    auto apu = std::make_shared<nes::apu::APURP2A03SDL>();
+    auto controller = std::make_shared<nes::controller::Controller>();
+
+    auto bus = std::make_shared<nes::Bus>(cpu, ram, ppu, apu, controller);
+
+    auto cart = std::make_shared<nes::cart::Cart>(argc > 1 ? argv[1] : "roms/donkey_kong.nes");
+    std::cout << *cart << std::endl;
+
+    bus->load_cart(cart);
+
+    bus->reset();
 
     bool done = false;
     int pass = 0;
@@ -106,36 +112,24 @@ int main(int argc, char *argv[]) {
 		}
 
         if (!done) {
-            void *screen_pixels;
-            int screen_pitch;
-            if (SDL_LockTexture(screen, NULL, &screen_pixels, &screen_pitch) < 0) {
-                cerr << "ERROR: Unable to lock screen texture!" << endl;
-                return 4;
-            }
+            ppu->open_screen();
             for (int y = 0; y < NES_SCREEN_HEIGHT; y++) {
-                uint32_t *screen_row = (uint32_t *)((uint8_t *)screen_pixels + y * screen_pitch);
                 for (int x = 0; x < NES_SCREEN_WIDTH; x++) {
-                    uint8_t pixel_red = y;
-                    uint8_t pixel_green = x;
-                    uint8_t pixel_blue = y * x + pass;
-                    *(screen_row + x) = (
-                        0xFF000000L |
-                        ((uint32_t)pixel_red & 0xFF) << 16 |
-                        ((uint32_t)pixel_green & 0xFF) << 8 |
-                        ((uint32_t)pixel_blue & 0xFF)
-                    );
+                    uint8_t r = y;
+                    uint8_t g = x;
+                    uint8_t b = y * x + pass;
+                    ppu->set_pixel(x, y, r, g, b);
                 }
             }
             pass++;
-            SDL_UnlockTexture(screen);
+            ppu->close_screen();
 
             SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, screen, NULL, NULL);
+            SDL_RenderCopy(renderer, const_cast<SDL_Texture *>(ppu->get_screen_texture()), NULL, NULL);
             SDL_RenderPresent(renderer);
         }
     }
 
-    SDL_DestroyTexture(screen);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

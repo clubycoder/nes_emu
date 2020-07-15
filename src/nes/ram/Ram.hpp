@@ -37,11 +37,10 @@ namespace nes { namespace ram {
 
 class Ram : public Component {
 public:
-    virtual void reset();
-    virtual void clock();
+    void reset() override;
 
-    inline const uint8_t cpu_read(const uint16_t addr) const;
-    inline void cpu_write(const uint16_t addr, const uint8_t data);
+    const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override;
+    const bool cpu_write(const uint16_t addr, const uint8_t data) override;
 
 private:
     static const uint16_t SIZE = 2048;

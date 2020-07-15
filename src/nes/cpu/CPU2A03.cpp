@@ -31,10 +31,14 @@ Links:
 - https://en.wikipedia.org/wiki/Ricoh_2A03
 *******************************************************************************/
 
+#include <stdexcept>
+#include <iostream>
+#include <fstream>
 #include <cstdint>
-#include <memory>
 
+#include <utils/string_format.hpp>
 #include <nes/cpu/CPU2A03.hpp>
+#include <nes/Bus.hpp>
 
 namespace nes { namespace cpu {
 
@@ -49,11 +53,17 @@ void CPU2A03::connect_bus(std::shared_ptr<nes::Bus> bus) {
 }
 
 uint8_t CPU2A03::bus_read(const uint16_t addr) {
-    return bus->cpu_read(addr);
+    uint8_t data = 0x00;
+    if (!m_bus->cpu_read(addr, data)) {
+        throw std::runtime_error(utils::string_format("Invalid bus read from 0x%08X", addr));
+    }
+    return data;
 }
 
 void CPU2A03::bus_write(const uint16_t addr, const uint8_t data) {
-    bus->cpu_write(addr, data);
+    if (!m_bus->cpu_write(addr, data)) {
+        throw std::runtime_error(utils::string_format("Invalid bus write to 0x%08X", addr));
+    }
 }
 
 }} // nes::cpu

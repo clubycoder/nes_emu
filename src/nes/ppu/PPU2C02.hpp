@@ -46,13 +46,16 @@ public:
     PPU2C02() {
     }
 
-    virtual void reset();
+    void reset() override;
 
-    virtual void clock();
+    void clock() override;
 
-protected:
-    virtual void open_screen();
-    virtual void close_screen();
+    const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override;
+    const bool cpu_write(const uint16_t addr, const uint8_t data) override;
+
+public: // TODO: Change to protected
+    virtual void open_screen() = 0;
+    virtual void close_screen() = 0;
     virtual void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) = 0;
 
 private:

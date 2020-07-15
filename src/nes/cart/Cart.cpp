@@ -33,7 +33,6 @@ Links:
 #include <iostream>
 #include <fstream>
 #include <cstdint>
-#include <cstring>
 
 #include <utils/string_format.hpp>
 #include <nes/cart/Cart.hpp>
@@ -95,6 +94,8 @@ Cart::Cart(const std::string &filename) {
             case 0: m_mapper = std::make_shared<nes::cart::mapper::Mapper000>(m_num_prg_banks, m_num_chr_banks); break;
             default: throw std::runtime_error(utils::string_format("Mapper %u not supported", m_mapper_id));
         }
+    } else {
+        throw std::runtime_error(utils::string_format("Failed to load ROM %s", m_filename.c_str()));
     }
 }
 
@@ -102,10 +103,70 @@ Cart::~Cart() {
 }
 
 void Cart::reset() {
-
+    // Reset the mapper but do not reload the cartridge
+    if (m_mapper != nullptr) {
+        m_mapper->reset();
+    }
 }
 
-void Cart::clock() {
+const bool Cart::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = 0x00;
+
+    uint32_t mapped_addr = 0x00000000L;
+    if (m_mapper->cpu_map_read_addr(addr, mapped_addr)) {
+        if (mapped_addr < m_prg_mem.size()) {
+            data = m_prg_mem[mapped_addr];
+            return true;
+        } else {
+            throw std::runtime_error(utils::string_format("Mapped read address 0x%08X is out of PRG range 0x%08X - 0x%08X", mapped_addr, 0, m_prg_mem.size()));
+        }
+    }
+
+    return false;
+}
+
+const bool Cart::cpu_write(const uint16_t addr, const uint8_t data) {
+    uint32_t mapped_addr = 0x00000000L;
+    if (m_mapper->cpu_map_write_addr(addr, mapped_addr, data)) {
+        if (mapped_addr < m_prg_mem.size()) {
+            m_prg_mem[mapped_addr] = data;
+            return true;
+        } else {
+            throw std::runtime_error(utils::string_format("Mapped write address 0x%08X is out of PRG range 0x%08X - 0x%08X", mapped_addr, 0, m_prg_mem.size()));
+        }
+    }
+
+    return false;
+}
+
+const bool Cart::ppu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = 0x00;
+
+    uint32_t mapped_addr = 0x00000000L;
+    if (m_mapper->ppu_map_read_addr(addr, mapped_addr)) {
+        if (mapped_addr < m_chr_mem.size()) {
+            data = m_chr_mem[mapped_addr];
+            return true;
+        } else {
+            throw std::runtime_error(utils::string_format("Mapped read address 0x%08X is out of CHR range 0x%08X - 0x%08X", mapped_addr, 0, m_chr_mem.size()));
+        }
+    }
+
+    return false;
+}
+
+const bool Cart::ppu_write(const uint16_t addr, const uint8_t data) {
+    uint32_t mapped_addr = 0x00000000L;
+    if (m_mapper->ppu_map_write_addr(addr, mapped_addr, data)) {
+        if (mapped_addr < m_chr_mem.size()) {
+            m_chr_mem[mapped_addr] = data;
+            return true;
+        } else {
+            throw std::runtime_error(utils::string_format("Mapped write address 0x%08X is out of CHR range 0x%08X - 0x%08X", mapped_addr, 0, m_chr_mem.size()));
+        }
+    }
+
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& os, const Cart& cart) {

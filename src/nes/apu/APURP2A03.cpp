@@ -29,3 +29,27 @@ the Nintendo Entertainment System
 Links:
 - https://wiki.nesdev.com/w/index.php/APU
 *******************************************************************************/
+
+#include <cstdint>
+
+#include <nes/apu/APURP2A03.hpp>
+
+namespace nes { namespace apu {
+
+void APURP2A03::reset() {
+}
+
+void APURP2A03::clock() {
+}
+
+const bool APURP2A03::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {
+    data = 0x00;
+
+    return true;
+}
+
+const bool APURP2A03::cpu_write(const uint16_t addr, const uint8_t data) {
+    return true;
+}
+
+}} // nes::apu

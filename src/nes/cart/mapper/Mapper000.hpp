@@ -40,8 +40,29 @@ namespace nes { namespace cart { namespace mapper {
 
 class Mapper000 : public Mapper {
 public:
+    Mapper000(uint8_t num_prg_banks, uint8_t num_chr_banks)
+        : Mapper(num_prg_banks, num_chr_banks) {
+        m_variation = num_prg_banks > 1 ? NROM_256 : NROM_128;
+    }
+
+    void reset() override;
+
+    // Map addresses in CPU read/write address space
+    const bool cpu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
+    const bool cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
+
+    // Map addresses in PPU read/write address space
+    const bool ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
+    const bool ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
 
 private:
+    const uint16_t ADDR_PRG_ROM_BEGIN = 0x8000; const uint16_t ADDR_PRG_ROM_END = 0xFFFF;
+    const uint16_t ADDR_CHR_ROM_BEGIN = 0x0000; const uint16_t ADDR_CHR_ROM_END = 0x1FFF;
+
+    enum Variation {
+        NROM_128,
+        NROM_256
+    } m_variation;
 
 };
 

@@ -23,58 +23,27 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Nintendo Entertainment System Cartridge
-
-Links:
-- https://wiki.nesdev.com/w/index.php/INES
+Emulation of ram
 *******************************************************************************/
 
 #pragma once
 
-#include <iostream>
 #include <cstdint>
 #include <vector>
-#include <string>
-#include <memory>
 
 #include <nes/Component.hpp>
-#include <nes/cart/Header.hpp>
-#include <nes/cart/mapper/Mapper.hpp>
 
-namespace nes { namespace cart {
+namespace nes { namespace controller {
 
-class Cart : public Component {
+class Controller : public Component {
 public:
-    static const uint32_t PRG_BANK_SIZE = 16 * 1024;
-    static const uint32_t CHR_BANK_SIZE = 8 * 1024;
-
-    Cart(const std::string &filename);
-    ~Cart();
-
-    // Reset cartridge to a known state (mainly the mapper)
     void reset() override;
 
-    // Handle read/write from CPU bus
     const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override;
     const bool cpu_write(const uint16_t addr, const uint8_t data) override;
 
-    // Handle read/write from PPU bus
-    const bool ppu_read(const uint16_t addr, uint8_t &data, const bool read_only = false);
-    const bool ppu_write(const uint16_t addr, const uint8_t data);
-
-    friend std::ostream& operator<<(std::ostream& os, const Cart& cart);
-
 private:
-    std::string m_filename;
-    Header m_header;
 
-    uint8_t m_num_prg_banks;
-    std::vector<uint8_t> m_prg_mem;
-    uint8_t m_num_chr_banks;
-    std::vector<uint8_t> m_chr_mem;
-
-    uint16_t m_mapper_id;
-    std::shared_ptr<nes::cart::mapper::Mapper> m_mapper;
 };
 
-}} // nes::cart
+}} // nes::controller

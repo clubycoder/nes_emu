@@ -31,8 +31,4 @@ intercepts / adstracts the system, cartrige, and PPU memory access
 
 namespace nes { namespace cart { namespace mapper {
 
-void Mapper::clock() {
-
-}
-
 }}} // nes::cart::mapper
