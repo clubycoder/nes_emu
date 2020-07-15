@@ -1,0 +1,23 @@
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Chris Luby"
+      VALUE "FileDescription", "Nintendo Entertainment System Emulator"
+      VALUE "FileVersion", "1.0"
+      VALUE "InternalName", "nes"
+      VALUE "LegalCopyright", "Chris Luby"
+      VALUE "OriginalFilename", "NES.exe"
+      VALUE "ProductName", "NES Emulator"
+      VALUE "ProductVersion", "1.0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END

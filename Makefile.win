@@ -2,6 +2,7 @@ rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(su
 
 MKDIR := mkdir
 RM := del /Q /S /F
+CP := copy
 
 SRC_DIR=src
 
@@ -11,20 +12,20 @@ ifeq ($(DEBUG), 1)
 	DEBUG_FLAGS=-g -DDEBUG
 else
 	BUILD_DIR=build/release
+	# Release doesn't get a console
+	DEBUG_FLAGS=-mwindows
 endif
 
 CXX := E:\devel\mingw64-x86_64\mingw64\bin\g++.exe
 CXXFLAGS := \
 	-c \
-	$(DEBUG_FLAGS) \
-    -mwindows
+	$(DEBUG_FLAGS)
 INCLUDES := \
 	-Isrc \
     -IE:\devel\SDL2\x86_64-w64-mingw32\include
 LD := E:\devel\mingw64-x86_64\mingw64\bin\g++.exe
 LDFLAGS := \
-	$(DEBUG_FLAGS) \
-    -mwindows
+	$(DEBUG_FLAGS)
 LIBS := \
     -LE:\devel\SDL2\x86_64-w64-mingw32\lib \
 	-lmingw32 \
@@ -35,6 +36,11 @@ OBJ_DIR := $(BUILD_DIR)/obj
 SRC_FILES := $(call rwildcard,$(SRC_DIR),*.cpp)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 BUILD_DIRS := $(dir $(OBJ_FILES))
+
+WIN_DIR := win
+RC_FILES := $(call rwildcard,$(WIN_DIR),*.rc)
+RES_FILES := $(patsubst $(WIN_DIR)/%.rc,$(OBJ_DIR)/%.res,$(RC_FILES))
+WINDRES := E:\devel\mingw64-x86_64\mingw64\bin\windres.exe
 
 APP := $(BUILD_DIR)/NES.exe
 
@@ -55,11 +61,15 @@ filesystem:
 clean:
 	$(RM) $(subst /,\,$(BUILD_DIR))
 
-$(APP): $(OBJ_FILES)
+$(APP): $(OBJ_FILES) $(RES_FILES)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CP) *SDL* $(subst /,\,$(BUILD_DIR))
 
 $(OBJ_DIR)/NES.o: $(SRC_DIR)/NES.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES)
+
+$(OBJ_DIR)/%.res: $(WIN_DIR)/%.rc
+	$(WINDRES) $< -O coff -o $@
