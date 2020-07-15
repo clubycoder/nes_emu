@@ -4,6 +4,13 @@
 # Build
 build
 
+# SDL
+README-SDL.txt
+SDL2.dll
+
+# Roms
+roms/*
+
 # Prerequisites
 *.d
 
