@@ -3,7 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}\\src",
                 "E:\\devel\\mingw64-x86_64\\mingw64\\include\\**",
                 "E:\\devel\\SDL2\\x86_64-w64-mingw32\\include\\**"
             ],
@@ -19,7 +19,7 @@
         }, {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/src"
             ],
             "defines": [],
             "macFrameworkPath": [

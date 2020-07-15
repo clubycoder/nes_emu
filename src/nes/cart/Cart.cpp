@@ -24,4 +24,73 @@ SOFTWARE.
 
 /*******************************************************************************
 Emulation of the Nintendo Entertainment System Cartridge
+
+Links:
+- https://wiki.nesdev.com/w/index.php/INES
 *******************************************************************************/
+
+#include <stdexcept>
+#include <iostream>
+#include <fstream>
+#include <cstdint>
+#include <cstring>
+
+#include <nes/cart/Cart.hpp>
+#include <utils/string_format.hpp>
+
+namespace nes { namespace cart {
+
+//const char Cart::MAGIC[4] = {0x4E, 0x45, 0x53, 0x1A}; // NES followed by MS-DOS EOF
+
+Cart::Cart(const std::string &filename) {
+    m_filename = filename;
+
+    std::ifstream ifs;
+	ifs.open(m_filename, std::ifstream::binary);
+	if (ifs.is_open()) {
+		// Read header
+		ifs.read((char *)&m_header, sizeof(Header));
+
+        // Validate header
+        if (strncmp(m_header.ines1.magic, MAGIC, 4) != 0) {
+            throw std::runtime_error(utils::string_format("ERROR: Cart magic is wrong.  Got %02X %02X %02X %02X but expected %02X %02X %02X %02X",
+                m_header.ines1.magic[0], m_header.ines1.magic[1], m_header.ines1.magic[2], m_header.ines1.magic[3],
+                MAGIC[0], MAGIC[1], MAGIC[2], MAGIC[0]
+            ));
+        }
+
+        // Check for iNES2 style header
+        if (m_header.ines1.flags7.ines2 == 2) {
+            // Handle as iNES2
+        } else {
+            // Handle as iNES1
+            m_mapper_id = m_header.ines1.flags7.mapper_id_high << 4 | m_header.ines1.flags6.mapper_id_low;
+        }
+
+        // Skip trainer
+        if (m_header.ines1.flags6.contains_trainer) {
+            ifs.seekg(512, std::ios_base::cur);
+        }
+    }
+}
+
+Cart::~Cart() {
+}
+
+std::ostream& operator<<(std::ostream& os, const Cart& cart) {
+    os << "NES Cartridge: " << cart.m_filename << std::endl;
+    os << "  Magic: " << utils::string_format(
+        "%02X %02X %02X %02X = %c%c%c",
+        cart.m_header.ines1.magic[0], cart.m_header.ines1.magic[1], cart.m_header.ines1.magic[2], cart.m_header.ines1.magic[3],
+        cart.m_header.ines1.magic[0], cart.m_header.ines1.magic[1], cart.m_header.ines1.magic[2]
+    ) << ", Type: " << (cart.m_header.ines1.flags7.ines2 == 2 ? 2 : 1) << std::endl;
+    os << "  Mapper " << cart.m_mapper_id << ": " << std::endl;
+    if (cart.m_header.ines1.flags7.ines2 == 2) {
+        // Display as iNES2
+    } else {
+        // Display as iNES1
+    }
+    return os;
+}
+
+}}

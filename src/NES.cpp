@@ -36,6 +36,8 @@ Links:
 
 #include <SDL2/SDL.h>
 
+#include <nes/cart/Cart.hpp>
+
 using namespace std;
 
 const int NES_SCREEN_WIDTH = 256;
@@ -46,7 +48,11 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 SDL_Texture *screen = NULL;
 
-int main(int arg, char *argv[]) {
+int main(int argc, char *argv[]) {
+    auto cart = argc > 1 ? nes::cart::Cart(argv[1]) : nes::cart::Cart("roms/donkey_kong.nes");
+    std::cout << cart << std::endl;
+
+
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
 
     window = SDL_CreateWindow(

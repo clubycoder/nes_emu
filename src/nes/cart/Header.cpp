@@ -29,49 +29,8 @@ Links:
 - https://wiki.nesdev.com/w/index.php/INES
 *******************************************************************************/
 
-#pragma once
-
-#include <iostream>
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <memory>
-
 #include <nes/cart/Header.hpp>
-#include <nes/cart/mapper/Mapper.hpp>
 
 namespace nes { namespace cart {
-
-class Cart {
-public:
-    static const uint32_t PRG_BANK_SIZE = 16 * 1024;
-    static const uint32_t CHR_BANK_SIZE = 8 * 1024;
-
-    Cart(const std::string &filename);
-    ~Cart();
-
-    // Reset cartridge to a known state (mainly the mapper)
-    void reset();
-
-    // Handle read/write from CPU bus
-    bool cpu_read(const uint16_t addr, uint8_t &data);
-    bool cpu_write(const uint16_t addr, const uint8_t data);
-
-    // Handle read/write from PPU bus
-    bool ppu_read(const uint16_t addr, uint8_t &data);
-    bool ppu_write(const uint16_t addr, const uint8_t data);
-
-    friend std::ostream& operator<<(std::ostream& os, const Cart& cart);
-
-private:
-    std::string m_filename;
-    Header m_header;
-
-    std::vector<uint8_t> m_prg_mem;
-    std::vector<uint8_t> m_chr_mem;
-
-    uint16_t m_mapper_id;
-    std::shared_ptr<nes::cart::mapper::Mapper> m_mapper;
-};
 
 }} // nes::cart
