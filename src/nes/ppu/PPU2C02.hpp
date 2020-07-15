@@ -31,3 +31,32 @@ Links:
 *******************************************************************************/
 
 #pragma once
+
+#include <cstdint>
+
+#include <nes/Component.hpp>
+
+namespace nes { namespace ppu {
+
+class PPU2C02 : public Component {
+public:
+    static const int SCREEN_WIDTH = 256;
+    static const int SCREEN_HEIGHT = 240;
+
+    PPU2C02() {
+    }
+
+    virtual void reset();
+
+    virtual void clock();
+
+protected:
+    virtual void open_screen();
+    virtual void close_screen();
+    virtual void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) = 0;
+
+private:
+
+};
+
+}} // nes::ppu

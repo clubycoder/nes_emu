@@ -32,3 +32,52 @@ Links:
 *******************************************************************************/
 
 #pragma once
+
+#include <cstdint>
+#include <memory>
+
+#include <nes/Component.hpp>
+#include <nes/Bus.hpp>
+
+namespace nes { namespace cpu {
+
+class CPU2A03 : public Component {
+public:
+    virtual void reset();
+
+    virtual void clock();
+
+    void connect_bus(std::shared_ptr<Bus> bus);
+	
+	void irq(); // Interrupt Request - Executes an instruction at a specific location
+	void nmi(); // Non-Maskable Interrupt Request - As above, but cannot be disabled
+
+private:
+    std::shared_ptr<nes::Bus> m_bus;
+    uint8_t bus_read(const uint16_t addr);
+    void bus_write(const uint16_t addr, const uint8_t data);
+
+    struct Registers {
+        uint8_t a = 0x00; // Accumulator
+        uint8_t x = 0x00; // X
+        uint8_t y = 0x00; // Y
+        uint8_t stkp = 0x00; // Stack pointer (address on bus)
+        uint16_t pc = 0x0000; // Program counter
+        uint8_t status = 0x00; // Status
+    } reg;
+
+    enum StatusFlags 	{
+        C = (1 << 0), // Carry
+        Z = (1 << 1), // Zero
+        I = (1 << 2), // Disable Interrupts
+        B = (1 << 4), // Break
+        V = (1 << 6), // Overflow
+        N = (1 << 7) // Negative
+    };
+
+    bool get_status_flag(StatusFlags f);
+    bool set_status_flag(StatusFlags f, bool value);
+
+};
+
+}} // nes::cpu

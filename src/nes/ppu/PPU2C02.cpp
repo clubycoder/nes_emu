@@ -29,3 +29,17 @@ Entertainment System
 Links:
 - https://wiki.nesdev.com/w/index.php/PPU
 *******************************************************************************/
+
+#include <cstdint>
+
+#include <nes/ppu/PPU2C02.hpp>
+
+namespace nes { namespace ppu {
+
+void PPU2C02::reset() {
+}
+
+void PPU2C02::clock() {
+}
+
+}} // nes::ppu

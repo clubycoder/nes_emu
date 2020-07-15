@@ -31,31 +31,31 @@ intercepts / adstracts the system, cartrige, and PPU memory access
 
 #include <cstdint>
 
+#include <nes/Component.hpp>
+
 namespace nes { namespace cart { namespace mapper {
 
-class Mapper {
+class Mapper : public Component {
 public:
-    Mapper(uint8_t numPRGBanks, uint8_t numCHRBanks)
-        : m_numPRGBanks(numPRGBanks)
-        , m_numCHRBanks(numCHRBanks) {
-          reset();
+    Mapper(uint8_t num_prg_banks, uint8_t num_chr_banks)
+        : m_num_prg_banks(num_prg_banks)
+        , m_num_chr_banks(num_chr_banks) {
     }
     ~Mapper();
 
-    // Reset the mapper to a known state
-    virtual void reset() = 0;
+    virtual void clock();
 
     // Manage read/write in CPU address space
-    virtual bool cpuRead(uint16_t addr, uint32_t &mapped_addr, uint8_t &data) = 0;
-    virtual bool cpuWrite(uint16_t addr, uint32_t &mapped_addr, uint8_t data) = 0;
+    virtual bool cpu_read(uint16_t addr, uint32_t &mapped_addr, uint8_t &data) = 0;
+    virtual bool cpu_write(uint16_t addr, uint32_t &mapped_addr, uint8_t data) = 0;
 
     // Manage read/write in the PPU address space
-    virtual bool ppuRead(uint16_t addr, uint32_t &mapped_addr, uint8_t &data) = 0;
-    virtual bool ppuWrite(uint16_t addr, uint32_t &mapped_addr, uint8_t data) = 0;
+    virtual bool ppu_read(uint16_t addr, uint32_t &mapped_addr, uint8_t &data) = 0;
+    virtual bool ppu_write(uint16_t addr, uint32_t &mapped_addr, uint8_t data) = 0;
 
 private:
-    uint8_t m_numPRGBanks;
-    uint8_t m_numCHRBanks;
+    uint8_t m_num_prg_banks;
+    uint8_t m_num_chr_banks;
 };
 
 }}} // nes::cart::mapper

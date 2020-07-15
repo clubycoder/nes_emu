@@ -23,26 +23,40 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper 000 / NROM chip on some of the the Nintendo Entertainment
-System Cartriges
-
-Links:
-- https://wiki.nesdev.com/w/index.php/NROM
+SDL implementation of PPU
 *******************************************************************************/
 
 #pragma once
 
 #include <cstdint>
 
-#include <nes/cart/mapper/Mapper.hpp>
+#include <SDL2/SDL.h>
 
-namespace nes { namespace cart { namespace mapper {
+#include <nes/ppu/PPU2C02.hpp>
 
-class Mapper000 : public Mapper {
+namespace nes { namespace ppu {
+
+class PPU2C02SDL : public PPU2C02 {
 public:
+    PPU2C02SDL(SDL_Renderer *renderer) : PPU2C02() {
+        setup_screen_texture(renderer);
+    };
+    ~PPU2C02SDL();
+
+    const SDL_Texture *get_screen_texture() const;
+
+protected:
+    virtual void open_screen();
+    virtual void close_screen();
+    virtual void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
 
 private:
+    SDL_Texture *m_screen_texture;
+    int m_screen_pitch;
+    void *m_screen_pixels;
+
+    void setup_screen_texture(SDL_Renderer *renderer);
 
 };
 
-}}} // nes::cart::mapper
+}}

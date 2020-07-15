@@ -37,12 +37,13 @@ Links:
 #include <string>
 #include <memory>
 
+#include <nes/Component.hpp>
 #include <nes/cart/Header.hpp>
 #include <nes/cart/mapper/Mapper.hpp>
 
 namespace nes { namespace cart {
 
-class Cart {
+class Cart : public Component {
 public:
     static const uint32_t PRG_BANK_SIZE = 16 * 1024;
     static const uint32_t CHR_BANK_SIZE = 8 * 1024;
@@ -51,7 +52,9 @@ public:
     ~Cart();
 
     // Reset cartridge to a known state (mainly the mapper)
-    void reset();
+    virtual void reset();
+
+    virtual void clock();
 
     // Handle read/write from CPU bus
     bool cpu_read(const uint16_t addr, uint8_t &data);
@@ -67,7 +70,9 @@ private:
     std::string m_filename;
     Header m_header;
 
+    uint8_t m_num_prg_banks;
     std::vector<uint8_t> m_prg_mem;
+    uint8_t m_num_chr_banks;
     std::vector<uint8_t> m_chr_mem;
 
     uint16_t m_mapper_id;

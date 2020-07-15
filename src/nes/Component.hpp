@@ -23,26 +23,21 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper 000 / NROM chip on some of the the Nintendo Entertainment
-System Cartriges
-
-Links:
-- https://wiki.nesdev.com/w/index.php/NROM
+Shared component interface
 *******************************************************************************/
 
 #pragma once
 
-#include <cstdint>
+namespace nes {
 
-#include <nes/cart/mapper/Mapper.hpp>
-
-namespace nes { namespace cart { namespace mapper {
-
-class Mapper000 : public Mapper {
+class Component {
 public:
+    virtual void reset() = 0;
+
+    virtual void clock() = 0;
 
 private:
 
 };
 
-}}} // nes::cart::mapper
+} // nes

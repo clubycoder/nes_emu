@@ -30,3 +30,30 @@ Links:
 - https://wiki.nesdev.com/w/index.php/CPU
 - https://en.wikipedia.org/wiki/Ricoh_2A03
 *******************************************************************************/
+
+#include <cstdint>
+#include <memory>
+
+#include <nes/cpu/CPU2A03.hpp>
+
+namespace nes { namespace cpu {
+
+void CPU2A03::reset() {
+}
+
+void CPU2A03::clock() {
+}
+
+void CPU2A03::connect_bus(std::shared_ptr<nes::Bus> bus) {
+    m_bus = bus;
+}
+
+uint8_t CPU2A03::bus_read(const uint16_t addr) {
+    return bus->cpu_read(addr);
+}
+
+void CPU2A03::bus_write(const uint16_t addr, const uint8_t data) {
+    bus->cpu_write(addr, data);
+}
+
+}} // nes::cpu

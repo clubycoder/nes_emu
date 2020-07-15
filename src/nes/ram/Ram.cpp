@@ -23,26 +23,31 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper 000 / NROM chip on some of the the Nintendo Entertainment
-System Cartriges
-
-Links:
-- https://wiki.nesdev.com/w/index.php/NROM
+Emulation of ram
 *******************************************************************************/
 
-#pragma once
-
 #include <cstdint>
+#include <vector>
+#include <algorithm>
 
-#include <nes/cart/mapper/Mapper.hpp>
+#include <nes/ram/Ram.hpp>
 
-namespace nes { namespace cart { namespace mapper {
+namespace nes { namespace ram {
 
-class Mapper000 : public Mapper {
-public:
+void Ram::reset() {
+    m_data.resize(SIZE);
+    std::fill(m_data.begin(), m_data.begin(), 0x00);
+}
 
-private:
+void Ram::clock() {
+}
 
+const uint8_t Ram::cpu_read(const uint16_t addr) const {
+    return m_data[addr & (SIZE - 1)];
 };
 
-}}} // nes::cart::mapper
+void Ram::cpu_write(const uint16_t addr, const uint8_t data) {
+    m_data[addr & (SIZE - 1)] = data;
+}
+
+}} // nes::ram

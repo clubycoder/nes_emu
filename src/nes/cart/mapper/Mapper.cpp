@@ -26,3 +26,13 @@ SOFTWARE.
 Emulation of the Mapper chip on the Nintendo Entertainment System Cartrige that
 intercepts / adstracts the system, cartrige, and PPU memory access
 *******************************************************************************/
+
+#include <nes/cart/mapper/Mapper.hpp>
+
+namespace nes { namespace cart { namespace mapper {
+
+void Mapper::clock() {
+
+}
+
+}}} // nes::cart::mapper

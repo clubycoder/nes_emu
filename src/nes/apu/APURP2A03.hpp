@@ -31,3 +31,24 @@ Links:
 *******************************************************************************/
 
 #pragma once
+
+#include <cstdint>
+
+namespace nes { namespace apu {
+
+class APURP2A03 {
+public:
+    void reset();
+
+    void clock();
+
+    void cpu_write(uint16_t addr, uint8_t data);
+    uint8_t cpu_read(uint16_t addr);
+
+protected:
+
+private:
+
+};
+
+}} // nes::apu

@@ -23,26 +23,53 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper 000 / NROM chip on some of the the Nintendo Entertainment
-System Cartriges
-
-Links:
-- https://wiki.nesdev.com/w/index.php/NROM
+SDL implementation of PPU
 *******************************************************************************/
 
-#pragma once
-
+#include <stdexcept>
 #include <cstdint>
 
-#include <nes/cart/mapper/Mapper.hpp>
+#include <SDL2/SDL.h>
 
-namespace nes { namespace cart { namespace mapper {
+#include <nes/ppu/PPU2C02SDL.hpp>
 
-class Mapper000 : public Mapper {
-public:
+namespace nes { namespace ppu {
 
-private:
+void PPU2C02SDL::setup_screen_texture(SDL_Renderer *renderer) {
+    m_screen_texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+    );
+    if (!m_screen_texture) {
+        throw std::runtime_error("Unable to create screen texture");
+    }
+}
 
-};
+const SDL_Texture *PPU2C02SDL::get_screen_texture() const {
+    return m_screen_texture;
+}
 
-}}} // nes::cart::mapper
+void PPU2C02SDL::open_screen() {
+    if (SDL_LockTexture(m_screen_texture, NULL, &m_screen_pixels, &m_screen_pitch) < 0) {
+        throw std::runtime_error("Unable to lock screen texture");
+    }
+}
+
+void PPU2C02SDL::close_screen() {
+    SDL_UnlockTexture(m_screen_texture);
+}
+
+void PPU2C02SDL::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    uint32_t *screen_row = (uint32_t *)((uint8_t *)m_screen_pixels + y * m_screen_pitch);
+    *(screen_row + x) = (
+        0xFF000000L |
+        ((uint32_t)r & 0xFF) << 16 |
+        ((uint32_t)g & 0xFF) << 8 |
+        ((uint32_t)b & 0xFF)
+    );
+}
+
+}} // nes::ppu
