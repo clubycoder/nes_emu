@@ -66,4 +66,31 @@ void CPU2A03::bus_write(const uint16_t addr, const uint8_t data) {
     }
 }
 
+bool CPU2A03::get_status_flag(const StatusFlag f) const {
+    return (m_reg.status & f) > 0;
+}
+
+void CPU2A03::set_status_flag(const StatusFlag f, const bool value) {
+    if (value) {
+        m_reg.status |= f;
+    } else {
+        m_reg.status &= ~f;
+    }
+}
+
+std::ostream& operator<<(std::ostream& os, const CPU2A03& cpu) {
+    os << utils::string_format("CPU-2A03: A=0x%02X(%d) X=0x%02X(%d) Y=0x%02X(%d) STKP=0x%02X PC=0x%04X STATUS=%02X",
+        cpu.m_reg.a, cpu.m_reg.a, cpu.m_reg.x, cpu.m_reg.x, cpu.m_reg.y, cpu.m_reg.y,
+        cpu.m_reg.stkp, cpu.m_reg.pc, cpu.m_reg.status) << std::endl;
+    os << utils::string_format("  Status Flags: C=%d, Z=%d, I=%d, B=%d, V=%d, N=%d",
+        cpu.get_status_flag(CPU2A03::StatusFlag::C),
+        cpu.get_status_flag(CPU2A03::StatusFlag::Z),
+        cpu.get_status_flag(CPU2A03::StatusFlag::I),
+        cpu.get_status_flag(CPU2A03::StatusFlag::B),
+        cpu.get_status_flag(CPU2A03::StatusFlag::O),
+        cpu.get_status_flag(CPU2A03::StatusFlag::N)) << std::endl;
+
+    return os;
+}
+
 }} // nes::cpu

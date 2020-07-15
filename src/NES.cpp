@@ -94,6 +94,8 @@ int main(int argc, char *argv[]) {
 
     bus->reset();
 
+    std::cout << *cpu << std::endl;
+
     bool done = false;
     int pass = 0;
     while (!done) {

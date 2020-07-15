@@ -62,6 +62,8 @@ public:
     const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) override { return false; };
     const bool cpu_write(const uint16_t addr, const uint8_t data) override { return false; };
 
+    friend std::ostream& operator<<(std::ostream& os, const CPU2A03& cpu);
+
 private:
     std::shared_ptr<nes::Bus> m_bus;
     uint8_t bus_read(const uint16_t addr);
@@ -74,19 +76,19 @@ private:
         uint8_t stkp = 0x00; // Stack pointer (address on bus)
         uint16_t pc = 0x0000; // Program counter
         uint8_t status = 0x00; // Status
-    } reg;
+    } m_reg;
 
-    enum StatusFlags 	{
+    enum StatusFlag {
         C = (1 << 0), // Carry
         Z = (1 << 1), // Zero
         I = (1 << 2), // Disable Interrupts
         B = (1 << 4), // Break
-        V = (1 << 6), // Overflow
+        O = (1 << 6), // Overflow
         N = (1 << 7) // Negative
     };
 
-    bool get_status_flag(StatusFlags f);
-    bool set_status_flag(StatusFlags f, bool value);
+    bool get_status_flag(const StatusFlag f) const;
+    void set_status_flag(const StatusFlag f, const bool value);
 
 };
 
