@@ -35,8 +35,12 @@ Links:
 
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <nes/Component.hpp>
+#include <nes/cpu/CPU2A03Addressing.hpp>
+#include <nes/cpu/CPU2A03Instructions.hpp>
 
 // Forward declaration for Bus
 namespace nes {
@@ -65,6 +69,13 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const CPU2A03& cpu);
 
 private:
+    friend class CPU2A03Addressing;
+    friend class CPU2A03Instructions;
+
+    const uint16_t RESET_PC_ADDR = 0xFFFC;
+    const uint8_t RESET_STKP_START = 0xFD;
+    const uint8_t RESET_CYCLES = 8;
+
     std::shared_ptr<nes::Bus> m_bus;
     uint8_t bus_read(const uint16_t addr);
     void bus_write(const uint16_t addr, const uint8_t data);
@@ -83,6 +94,7 @@ private:
         Z = (1 << 1), // Zero
         I = (1 << 2), // Disable Interrupts
         B = (1 << 4), // Break
+        U = (1 << 5), // Unused
         O = (1 << 6), // Overflow
         N = (1 << 7) // Negative
     };
@@ -90,6 +102,28 @@ private:
     bool get_status_flag(const StatusFlag f) const;
     void set_status_flag(const StatusFlag f, const bool value);
 
+    struct Instruction {
+        std::string name;
+        bool (*execute)(CPU2A03&) = nullptr;
+        bool (*evaluate_address)(CPU2A03&) = nullptr;
+        uint8_t cycles = 0;
+    };
+    static const std::vector<Instruction> INT_LOOKUP;
+
+    struct InstructionState {
+        uint8_t opcode;
+        uint8_t cycles;
+        uint8_t fetched;
+        uint16_t addr_abs;
+        uint16_t addr_rel;
+        Instruction instruction;
+    } m_instr_state;
+
+    // Lines of disasembled instructions indexed by m_reg.pc
+    std::vector<std::string> m_disasm;
+    uint32_t m_disasm_pc, m_disasm_pc_min, m_disasm_pc_max;
+
+    void disasm_current();
 };
 
 }} // nes::cpu

@@ -87,6 +87,8 @@ int main(int argc, char *argv[]) {
 
     auto bus = std::make_shared<nes::Bus>(cpu, ram, ppu, apu, controller);
 
+    cpu->connect_bus(bus);
+
     auto cart = std::make_shared<nes::cart::Cart>(argc > 1 ? argv[1] : "roms/donkey_kong.nes");
     std::cout << *cart << std::endl;
 
@@ -114,6 +116,8 @@ int main(int argc, char *argv[]) {
 		}
 
         if (!done) {
+            bus->clock();
+
             ppu->open_screen();
             for (int y = 0; y < NES_SCREEN_HEIGHT; y++) {
                 for (int x = 0; x < NES_SCREEN_WIDTH; x++) {

@@ -63,6 +63,7 @@ void Bus::clock() {
 }
 
 void Bus::load_cart(std::shared_ptr<nes::cart::Cart> cart) {
+    m_cart = cart;
     reset();
 }
 
