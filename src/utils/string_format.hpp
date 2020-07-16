@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <memory>
+#include <cstring>
+
 namespace utils {
 
 template<typename ... Args>
