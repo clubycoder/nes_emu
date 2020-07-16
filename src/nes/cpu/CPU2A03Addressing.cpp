@@ -120,7 +120,7 @@ bool CPU2A03Addressing::ABX(CPU2A03 &cpu) {
     uint16_t high = cpu.bus_read(cpu.m_reg.pc);
     cpu.m_reg.pc++;
     cpu.m_instr_state.addr_abs = ((high << 8) | low) + cpu.m_reg.x;
-    if (cpu.m_instr_state.addr_abs & 0xFF00 != high << 8) {
+    if ((cpu.m_instr_state.addr_abs & 0xFF00) != high << 8) {
         return true;
     }
     return false;
@@ -136,7 +136,7 @@ bool CPU2A03Addressing::ABY(CPU2A03 &cpu) {
     uint16_t high = cpu.bus_read(cpu.m_reg.pc);
     cpu.m_reg.pc++;
     cpu.m_instr_state.addr_abs = ((high << 8) | low) + cpu.m_reg.y;
-    if (cpu.m_instr_state.addr_abs & 0xFF00 != high << 8) {
+    if ((cpu.m_instr_state.addr_abs & 0xFF00) != high << 8) {
         return true;
     }
     return false;
@@ -185,7 +185,7 @@ bool CPU2A03Addressing::IZY(CPU2A03 &cpu) {
     uint16_t low = cpu.bus_read(ptr & 0x00FF);
     uint16_t high = cpu.bus_read((ptr + 1) & 0x00FF);
     cpu.m_instr_state.addr_abs = ((high << 8) | low) + cpu.m_reg.y;
-    if (cpu.m_instr_state.addr_abs & 0xFF00 != high << 8) {
+    if ((cpu.m_instr_state.addr_abs & 0xFF00) != high << 8) {
         return true;
     }
     return false;

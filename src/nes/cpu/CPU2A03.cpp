@@ -58,8 +58,8 @@ void CPU2A03::reset() {
     m_instr_state.cycles = RESET_CYCLES;
 
     m_disasm.clear();
-    m_disasm_pc_min = LONG_MAX;
-    m_disasm_pc_max = LONG_MIN;
+    m_disasm_pc_min = UINT32_MAX;
+    m_disasm_pc_max = 0;
 }
 
 void CPU2A03::clock() {

@@ -96,8 +96,6 @@ int main(int argc, char *argv[]) {
 
     bus->reset();
 
-    std::cout << *cpu << std::endl;
-
     bool done = false;
     int pass = 0;
     while (!done) {
@@ -117,6 +115,7 @@ int main(int argc, char *argv[]) {
 
         if (!done) {
             bus->clock();
+            std::cout << *cpu << std::endl;
 
             ppu->open_screen();
             for (int y = 0; y < NES_SCREEN_HEIGHT; y++) {
