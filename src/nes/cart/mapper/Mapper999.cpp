@@ -23,48 +23,59 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper 000 / NROM chip on some of the the Nintendo Entertainment
-System Cartriges
+Custom mapper used for development and debugging
 
-Links:
-- https://wiki.nesdev.com/w/index.php/NROM
+CPU:
+  0x8000 -> 0xFFFF: Map 0x0000 -> 0x7FFF
+  Writes to 0xFF01 outputs character to stdout
+
+PPU:
+  0x0000 -> 0x1FFF: No mapping is required
 *******************************************************************************/
 
-#pragma once
-
-#include <memory>
 #include <cstdint>
 
-#include <nes/cart/mapper/Mapper.hpp>
+#include <nes/cart/mapper/Mapper999.hpp>
+#include <nes/cart/Cart.hpp>
 
 namespace nes { namespace cart { namespace mapper {
 
-class Mapper000 : public Mapper {
-public:
-    Mapper000(std::shared_ptr<nes::cart::Cart> cart, uint8_t num_prg_banks, uint8_t num_chr_banks)
-        : Mapper(cart, num_prg_banks, num_chr_banks) {
-        m_variation = num_prg_banks > 1 ? NROM_256 : NROM_128;
+void Mapper999::reset() {
+    // Nothing to do on reset
+}
+
+const bool Mapper999::cpu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) {
+    if (addr >= ADDR_PRG_ROM_BEGIN && addr <= ADDR_PRG_ROM_END) {
+        mapped_addr = addr & 0x7FFF;
+        return true;
     }
 
-    void reset() override;
+    return false;
+}
 
-    // Map addresses in CPU read/write address space
-    const bool cpu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
-    const bool cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
+const bool Mapper999::cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) {
+    // If the write is going to the special character printing address,
+    // write the data out as a single character to stdout and flush.
+    if (addr == ADDR_PRG_PRINT_CHAR) {
+        mapped_addr = addr;
+        std::cout << (char)data << std::flush;
+        return true;
+    }
 
-    // Map addresses in PPU read/write address space
-    const bool ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
-    const bool ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
+    return false;
+}
 
-private:
-    static const uint16_t ADDR_PRG_ROM_BEGIN = 0x8000; static const uint16_t ADDR_PRG_ROM_END = 0xFFFF;
-    static const uint16_t ADDR_CHR_ROM_BEGIN = 0x0000; static const uint16_t ADDR_CHR_ROM_END = 0x1FFF;
+const bool Mapper999::ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) {
+    if (addr >= ADDR_CHR_ROM_BEGIN && addr <= ADDR_CHR_ROM_END) {
+        mapped_addr = addr;
+        return true;
+    }
 
-    enum Variation {
-        NROM_128,
-        NROM_256
-    } m_variation;
+    return false;
+}
 
-};
+const bool Mapper999::ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) {
+    return false;
+}
 
 }}} // nes::cart::mapper

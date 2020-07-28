@@ -40,16 +40,21 @@ Links:
 #include <nes/Component.hpp>
 #include <nes/cart/Header.hpp>
 #include <nes/cart/mapper/Mapper.hpp>
+#include <nes/cart/mapper/Mapper999.hpp>
 
 namespace nes { namespace cart {
 
-class Cart : public Component {
+class Cart : public Component, public std::enable_shared_from_this<Cart> {
 public:
     static const uint32_t PRG_BANK_SIZE = 16 * 1024;
     static const uint32_t CHR_BANK_SIZE = 8 * 1024;
 
     Cart(const std::string &filename);
+    Cart(const std::vector<uint8_t> &rom_memory, const uint16_t start_address);
     ~Cart();
+
+    // Setup the mapper once the ID is known
+    void setup_mapper();
 
     // Reset cartridge to a known state (mainly the mapper)
     void reset() override;
@@ -75,6 +80,20 @@ private:
 
     uint16_t m_mapper_id;
     std::shared_ptr<nes::cart::mapper::Mapper> m_mapper;
+
+    inline void set_prg(const uint32_t addr, const uint8_t data) {
+        if (addr >= m_prg_mem.size()) {
+            m_prg_mem.resize(addr + 1);
+        }
+        m_prg_mem[addr] = data;
+    }
+
+    inline void set_chr(const uint32_t addr, const uint8_t data) {
+        if (addr >= m_chr_mem.size()) {
+            m_chr_mem.resize(addr + 1);
+        }
+        m_chr_mem[addr] = data;
+    }
 };
 
 }} // nes::cart

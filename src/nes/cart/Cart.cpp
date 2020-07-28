@@ -33,16 +33,23 @@ Links:
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <cstring>
 
 #include <utils/string_format.hpp>
 #include <nes/cart/Cart.hpp>
 #include <nes/cart/mapper/Mapper000.hpp>
+#include <nes/cart/mapper/Mapper999.hpp>
+#include <nes/cpu/CPU2A03.hpp>
 
 namespace nes { namespace cart {
 
 //const char Cart::MAGIC[4] = {0x4E, 0x45, 0x53, 0x1A}; // NES followed by MS-DOS EOF
 
 Cart::Cart(const std::string &filename) {
+    // WARNING: This is a shared pointer hack to allow us to use shared_from_this()
+    // from within the constructor so we can hand a shared pointer to the mapper.
+    const auto trickDontRemove = std::shared_ptr<Cart>(this, [](Cart *){});
+
     m_filename = filename;
 
     std::ifstream ifs;
@@ -89,17 +96,43 @@ Cart::Cart(const std::string &filename) {
             ifs.read((char*)m_chr_mem.data(), m_chr_mem.size());
         }
 
-        // Setup the mapper
-        switch (m_mapper_id) {
-            case 0: m_mapper = std::make_shared<nes::cart::mapper::Mapper000>(m_num_prg_banks, m_num_chr_banks); break;
-            default: throw std::runtime_error(utils::string_format("Mapper %u not supported", m_mapper_id));
-        }
+        setup_mapper();
     } else {
         throw std::runtime_error(utils::string_format("Failed to load ROM %s", m_filename.c_str()));
     }
 }
 
+Cart::Cart(const std::vector<uint8_t> &rom_memory, const uint16_t start_address) {
+    // WARNING: This is a shared pointer hack to allow us to use shared_from_this()
+    // from within the constructor so we can hand a shared pointer to the mapper.
+    const auto trickDontRemove = std::shared_ptr<Cart>(this, [](Cart *){});
+
+    std::cout << "HERE.A" << std::endl;
+
+    m_filename = "<NONE>";
+
+    memset(&m_header, 0, sizeof(Header));
+
+    m_num_prg_banks = rom_memory.size() / PRG_BANK_SIZE;
+    m_prg_mem = rom_memory;
+    m_mapper_id = 999;
+
+    setup_mapper();
+
+    set_prg(nes::cpu::CPU2A03::RESET_PC_ADDR, start_address >> 8);
+    set_prg(nes::cpu::CPU2A03::RESET_PC_ADDR + 1, start_address & 0xFF);
+}
+
 Cart::~Cart() {
+}
+
+void Cart::setup_mapper() {
+    // Setup the mapper
+    switch (m_mapper_id) {
+        case 0: m_mapper = std::make_shared<nes::cart::mapper::Mapper000>(shared_from_this(), m_num_prg_banks, m_num_chr_banks); break;
+        case 999: m_mapper = std::make_shared<nes::cart::mapper::Mapper999>(shared_from_this(), m_num_prg_banks, m_num_chr_banks); break;
+        default: throw std::runtime_error(utils::string_format("Mapper %u not supported", m_mapper_id));
+    }
 }
 
 void Cart::reset() {

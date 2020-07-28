@@ -65,6 +65,8 @@ void CPU2A03::reset() {
 void CPU2A03::clock() {
     // make sure we have used up the current instruction's cycles before moving on to the next
     if (m_instr_state.cycles == 0) {
+        std::cout << *this << std::endl;
+
         // Save off pc for disasm
         m_disasm_pc = m_reg.pc;
 
@@ -111,6 +113,7 @@ uint8_t CPU2A03::bus_read(const uint16_t addr) {
     if (!m_bus->cpu_read(addr, data)) {
         throw std::runtime_error(utils::string_format("Invalid bus read from 0x%08X", addr));
     }
+    std::cout << utils::string_format("R: %02X", data) << std::endl;
     return data;
 }
 
@@ -192,14 +195,14 @@ void CPU2A03::disasm_current() {
 std::ostream& operator<<(std::ostream& os, const CPU2A03& cpu) {
     os << utils::string_format("CPU-2A03: A=$%02X(%d) X=$%02X(%d) Y=$%02X(%d) STKP=$%02X PC=$%04X STATUS=$%02X",
         cpu.m_reg.a, cpu.m_reg.a, cpu.m_reg.x, cpu.m_reg.x, cpu.m_reg.y, cpu.m_reg.y,
-        cpu.m_reg.stkp, cpu.m_reg.pc, cpu.m_reg.status) << std::endl;
-    os << utils::string_format("  Status Flags: C=%d, Z=%d, I=%d, B=%d, V=%d, N=%d",
+        cpu.m_reg.stkp, cpu.m_reg.pc, cpu.m_reg.status);
+    os << utils::string_format(" [C=%d, Z=%d, I=%d, B=%d, V=%d, N=%d]",
         cpu.get_status_flag(CPU2A03::StatusFlag::C),
         cpu.get_status_flag(CPU2A03::StatusFlag::Z),
         cpu.get_status_flag(CPU2A03::StatusFlag::I),
         cpu.get_status_flag(CPU2A03::StatusFlag::B),
         cpu.get_status_flag(CPU2A03::StatusFlag::O),
-        cpu.get_status_flag(CPU2A03::StatusFlag::N)) << std::endl;
+        cpu.get_status_flag(CPU2A03::StatusFlag::N));
 
     return os;
 }

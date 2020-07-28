@@ -41,6 +41,7 @@ Links:
 #include <nes/Component.hpp>
 #include <nes/cpu/CPU2A03Addressing.hpp>
 #include <nes/cpu/CPU2A03Instructions.hpp>
+#include <nes/cart/Cart.hpp>
 
 // Forward declaration for Bus
 namespace nes {
@@ -72,9 +73,12 @@ private:
     friend class CPU2A03Addressing;
     friend class CPU2A03Instructions;
 
-    const uint16_t RESET_PC_ADDR = 0xFFFC;
-    const uint8_t RESET_STKP_START = 0xFD;
-    const uint8_t RESET_CYCLES = 8;
+    // Cart has friend access just to reuse the consts below
+    friend class nes::cart::Cart;
+
+    static const uint16_t RESET_PC_ADDR = 0xFFFC;
+    static const uint8_t RESET_STKP_START = 0xFD;
+    static const uint8_t RESET_CYCLES = 8;
 
     std::shared_ptr<nes::Bus> m_bus;
     uint8_t bus_read(const uint16_t addr);

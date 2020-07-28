@@ -29,10 +29,13 @@ Links:
 - https://wiki.nesdev.com/w/index.php/Nesdev
 *******************************************************************************/
 
+#include <stdexcept>
 #include <memory>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <cstdint>
 
 #include <SDL2/SDL.h>
@@ -54,7 +57,88 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 SDL_Texture *screen = NULL;
 
-int main(int argc, char *argv[]) {
+class Options {
+public:
+    Options(int argc, char **argv) {
+        for (int argn = 1; argn < argc; argn += 2) {
+            std::string key(argv[argn]);
+            std::string value(argv[argn + 1]);
+            if (key == "-f") {
+                if (value.size() > 0) {
+                    rom_filename = value;
+                } else {
+                    throw std::runtime_error("Filename must not be blank");
+                }
+            } else if (key == "-s") {
+                /**
+                 Test:
+                   *=$8000
+                   LDX #10
+                   STX $0000
+                   LDX #3
+                   STX $0001
+                   LDY $0000
+                   LDA #0
+                   CLC
+                   loop
+                   ADC $0001
+                   DEY
+                   BNE loop
+                   STA $0002
+                   NOP
+                   NOP
+                   NOP
+
+                 Bytes:
+                   A2 0A 8E 00 00 A2 03 8E 01 00 AC 00 00 A9 00 18 6D 01 00 88 D0 FA 8D 02 00 EA EA EA
+                 */
+                if (value.size() > 0) {
+                    std::stringstream rom_string;
+                    rom_string << value;
+                    rom.clear();
+                    while (!rom_string.eof()) {
+                        std::string byte_string;
+                        rom_string >> byte_string;
+                        rom.push_back((uint8_t)std::stoul(byte_string, nullptr, 16));
+                    }
+                } else {
+                    throw std::runtime_error("Rom string must not be blank");
+                }
+            } else if (key == "-a") {
+                uint32_t pos = 0;
+                if (value.size() > 1 && value.substr(0, 1) == "$") {
+                    rom_start_address = std::stoul(value.substr(1), nullptr, 16);
+                } else if (value.size() > 0) {
+                    rom_start_address = std::stoul(value, nullptr, 16);
+                } else {
+                    throw std::runtime_error("Rom string start address must not be blank");
+                }
+            } else if (key == "-h") {
+                std::cout << argv[0] << " (-f NES-ROM.nes | -s \"ROM BYTES\" -a $CODE-START)" << std::endl;
+                std::cout << "  Start the Nintendo Entertainment System emulator with an NES ROM file:" << std::endl;
+                std::cout << "    -f NES-ROM.nes - Path to iNES1 or iNES2 ROM file." << std::endl;
+                std::cout << "  or with a string of bytes in hex separated by spaces that make up the rom:" << std::endl;
+                std::cout << "    -s \"ROM BYTES\" - Space separated byte values in HEX that make up the rom." << std::endl;
+                std::cout << "    -a $CODE-START - 16bit address for the start of code execution in the rom." << std::endl;
+                exit(0);
+            }
+        }
+
+        if (rom.size() > 0) {
+            rom_filename.clear();
+        } else if (rom_filename.size() <= 0) {
+            rom_filename = "roms/nestest.nes";
+        }
+    }
+
+    std::vector<uint8_t> rom;
+    uint16_t rom_start_address;
+    std::string rom_filename;
+};
+
+int main(int argc, char **argv) {
+    Options options(argc, argv);
+
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
 
     window = SDL_CreateWindow(
@@ -89,7 +173,11 @@ int main(int argc, char *argv[]) {
 
     cpu->connect_bus(bus);
 
-    auto cart = std::make_shared<nes::cart::Cart>(argc > 1 ? argv[1] : "roms/donkey_kong.nes");
+    auto cart = (
+        options.rom_filename.size() > 0 ?
+        std::make_shared<nes::cart::Cart>(options.rom_filename) :
+        std::make_shared<nes::cart::Cart>(options.rom, options.rom_start_address)
+    );
     std::cout << *cart << std::endl;
 
     bus->load_cart(cart);
@@ -115,7 +203,6 @@ int main(int argc, char *argv[]) {
 
         if (!done) {
             bus->clock();
-            std::cout << *cpu << std::endl;
 
             ppu->open_screen();
             for (int y = 0; y < NES_SCREEN_HEIGHT; y++) {

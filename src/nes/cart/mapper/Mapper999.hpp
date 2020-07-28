@@ -23,46 +23,39 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Emulation of the Mapper chip on the Nintendo Entertainment System Cartrige that
-intercepts / adstracts the system, cartrige, and PPU memory access
+Custom mapper used for development and debugging
 *******************************************************************************/
 
 #pragma once
 
 #include <memory>
+#include <map>
 #include <cstdint>
 
-// Forward declaration for Cart
-namespace nes { namespace cart {
-
-class Cart;
-
-}} // nes::cart
+#include <nes/cart/mapper/Mapper.hpp>
 
 namespace nes { namespace cart { namespace mapper {
 
-class Mapper {
+class Mapper999 : public Mapper {
 public:
-    Mapper(std::shared_ptr<nes::cart::Cart> cart, uint8_t num_prg_banks, uint8_t num_chr_banks)
-        : m_cart(cart)
-        , m_num_prg_banks(num_prg_banks)
-        , m_num_chr_banks(num_chr_banks) {
+    Mapper999(std::shared_ptr<nes::cart::Cart> cart, uint8_t num_prg_banks, uint8_t num_chr_banks)
+        : Mapper(cart, num_prg_banks, num_chr_banks) {
     }
 
-    virtual void reset() = 0;
+    void reset() override;
 
     // Map addresses in CPU read/write address space
-    virtual const bool cpu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) = 0;
-    virtual const bool cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) = 0;
+    const bool cpu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
+    const bool cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
 
     // Map addresses in PPU read/write address space
-    virtual const bool ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) = 0;
-    virtual const bool ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) = 0;
+    const bool ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) override;
+    const bool ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
 
-protected:
-    std::shared_ptr<nes::cart::Cart> m_cart;
-    uint8_t m_num_prg_banks;
-    uint8_t m_num_chr_banks;
+private:
+    static const uint16_t ADDR_PRG_ROM_BEGIN = 0x8000; static const uint16_t ADDR_PRG_ROM_END = 0xFEFF;
+    static const uint16_t ADDR_PRG_PRINT_CHAR = 0xFF01;
+    static const uint16_t ADDR_CHR_ROM_BEGIN = 0x0000; static const uint16_t ADDR_CHR_ROM_END = 0x1FFF;
 };
 
 }}} // nes::cart::mapper
