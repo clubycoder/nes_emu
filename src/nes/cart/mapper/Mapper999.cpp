@@ -62,7 +62,7 @@ const bool Mapper999::cpu_map_write_addr(const uint16_t addr, uint32_t &mapped_a
         return true;
     }
 
-    return false;
+    return cpu_map_read_addr(addr, mapped_addr);
 }
 
 const bool Mapper999::ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_addr) {
@@ -75,7 +75,7 @@ const bool Mapper999::ppu_map_read_addr(const uint16_t addr, uint32_t &mapped_ad
 }
 
 const bool Mapper999::ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) {
-    return false;
+    return ppu_map_read_addr(addr, mapped_addr);
 }
 
 }}} // nes::cart::mapper

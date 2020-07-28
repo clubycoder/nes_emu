@@ -43,7 +43,11 @@ Links:
 namespace nes { namespace cpu {
 
 void CPU2A03::reset() {
-    m_reg.pc = (bus_read(RESET_PC_ADDR) << 8) | bus_read(RESET_PC_ADDR + 1);
+    if (m_start_address > 0) {
+        m_reg.pc = (uint16_t)m_start_address;
+    } else {
+        m_reg.pc = (uint16_t)bus_read(RESET_PC_ADDR) | ((uint16_t)bus_read(RESET_PC_ADDR + 1) << 8);
+    }
     m_reg.a = 0x00;
     m_reg.x = 0x00;
     m_reg.y = 0x00;
@@ -65,7 +69,7 @@ void CPU2A03::reset() {
 void CPU2A03::clock() {
     // make sure we have used up the current instruction's cycles before moving on to the next
     if (m_instr_state.cycles == 0) {
-        std::cout << *this << std::endl;
+        // std::cout << *this << std::endl;
 
         // Save off pc for disasm
         m_disasm_pc = m_reg.pc;
@@ -104,6 +108,10 @@ void CPU2A03::clock() {
     m_instr_state.cycles--;
 }
 
+void CPU2A03::force_start_address(const uint16_t start_address) {
+    m_start_address = (int32_t)start_address;
+}
+
 void CPU2A03::connect_bus(std::shared_ptr<nes::Bus> bus) {
     m_bus = bus;
 }
@@ -113,7 +121,7 @@ uint8_t CPU2A03::bus_read(const uint16_t addr) {
     if (!m_bus->cpu_read(addr, data)) {
         throw std::runtime_error(utils::string_format("Invalid bus read from 0x%08X", addr));
     }
-    std::cout << utils::string_format("R: %02X", data) << std::endl;
+    std::cout << utils::string_format("$%04X = %02X", addr, data) << std::endl;
     return data;
 }
 

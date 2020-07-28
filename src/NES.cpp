@@ -111,7 +111,10 @@ public:
                 } else if (value.size() > 0) {
                     rom_start_address = std::stoul(value, nullptr, 16);
                 } else {
-                    throw std::runtime_error("Rom string start address must not be blank");
+                    throw std::runtime_error("Rom start address must not be blank");
+                }
+                if (rom_start_address < 0x0000 || rom_start_address > 0xFFFF) {
+                    throw std::runtime_error("Rom start address must be between 0x0000 - 0xFFFF");
                 }
             } else if (key == "-h") {
                 std::cout << argv[0] << " (-f NES-ROM.nes | -s \"ROM BYTES\" -a $CODE-START)" << std::endl;
@@ -119,7 +122,8 @@ public:
                 std::cout << "    -f NES-ROM.nes - Path to iNES1 or iNES2 ROM file." << std::endl;
                 std::cout << "  or with a string of bytes in hex separated by spaces that make up the rom:" << std::endl;
                 std::cout << "    -s \"ROM BYTES\" - Space separated byte values in HEX that make up the rom." << std::endl;
-                std::cout << "    -a $CODE-START - 16bit address for the start of code execution in the rom." << std::endl;
+                std::cout << "  Additional options:" << std::endl;
+                std::cout << "    -a $CODE-START - 16bit address for the start of code execution vs reading from 0xFFFC." << std::endl;
                 exit(0);
             }
         }
@@ -132,7 +136,7 @@ public:
     }
 
     std::vector<uint8_t> rom;
-    uint16_t rom_start_address;
+    int32_t rom_start_address;
     std::string rom_filename;
 };
 
@@ -176,11 +180,15 @@ int main(int argc, char **argv) {
     auto cart = (
         options.rom_filename.size() > 0 ?
         std::make_shared<nes::cart::Cart>(options.rom_filename) :
-        std::make_shared<nes::cart::Cart>(options.rom, options.rom_start_address)
+        std::make_shared<nes::cart::Cart>(options.rom)
     );
     std::cout << *cart << std::endl;
 
     bus->load_cart(cart);
+
+    if (options.rom_start_address > 0) {
+        cpu->force_start_address((uint16_t)options.rom_start_address);
+    }
 
     bus->reset();
 

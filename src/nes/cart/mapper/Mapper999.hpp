@@ -53,7 +53,7 @@ public:
     const bool ppu_map_write_addr(const uint16_t addr, uint32_t &mapped_addr, const uint8_t data) override;
 
 private:
-    static const uint16_t ADDR_PRG_ROM_BEGIN = 0x8000; static const uint16_t ADDR_PRG_ROM_END = 0xFEFF;
+    static const uint16_t ADDR_PRG_ROM_BEGIN = 0x8000; static const uint16_t ADDR_PRG_ROM_END = 0xFFFF;
     static const uint16_t ADDR_PRG_PRINT_CHAR = 0xFF01;
     static const uint16_t ADDR_CHR_ROM_BEGIN = 0x0000; static const uint16_t ADDR_CHR_ROM_END = 0x1FFF;
 };

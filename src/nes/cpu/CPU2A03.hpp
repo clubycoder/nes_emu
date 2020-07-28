@@ -58,6 +58,8 @@ public:
 
     void clock() override;
 
+    void force_start_address(const uint16_t start_address);
+
     void connect_bus(std::shared_ptr<nes::Bus> bus);
 	
 	void irq(); // Interrupt Request - Executes an instruction at a specific location
@@ -79,6 +81,8 @@ private:
     static const uint16_t RESET_PC_ADDR = 0xFFFC;
     static const uint8_t RESET_STKP_START = 0xFD;
     static const uint8_t RESET_CYCLES = 8;
+
+    int32_t m_start_address = -1;
 
     std::shared_ptr<nes::Bus> m_bus;
     uint8_t bus_read(const uint16_t addr);

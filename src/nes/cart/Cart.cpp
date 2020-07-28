@@ -102,12 +102,10 @@ Cart::Cart(const std::string &filename) {
     }
 }
 
-Cart::Cart(const std::vector<uint8_t> &rom_memory, const uint16_t start_address) {
+Cart::Cart(const std::vector<uint8_t> &rom_memory) {
     // WARNING: This is a shared pointer hack to allow us to use shared_from_this()
     // from within the constructor so we can hand a shared pointer to the mapper.
     const auto trickDontRemove = std::shared_ptr<Cart>(this, [](Cart *){});
-
-    std::cout << "HERE.A" << std::endl;
 
     m_filename = "<NONE>";
 
@@ -119,8 +117,10 @@ Cart::Cart(const std::vector<uint8_t> &rom_memory, const uint16_t start_address)
 
     setup_mapper();
 
-    set_prg(nes::cpu::CPU2A03::RESET_PC_ADDR, start_address >> 8);
-    set_prg(nes::cpu::CPU2A03::RESET_PC_ADDR + 1, start_address & 0xFF);
+    // Expand the rom size to have space to write the start address
+    m_prg_mem.resize(0xFFFF);
+    cpu_write(nes::cpu::CPU2A03::RESET_PC_ADDR, 0x00);
+    cpu_write(nes::cpu::CPU2A03::RESET_PC_ADDR + 1, 0x80);
 }
 
 Cart::~Cart() {
@@ -147,6 +147,7 @@ const bool Cart::cpu_read(const uint16_t addr, uint8_t &data, const bool read_on
 
     uint32_t mapped_addr = 0x00000000L;
     if (m_mapper->cpu_map_read_addr(addr, mapped_addr)) {
+        std::cout << utils::string_format("R: $%04X -> $%04X", addr, mapped_addr) << std::endl;
         if (mapped_addr < m_prg_mem.size()) {
             data = m_prg_mem[mapped_addr];
             return true;
@@ -161,6 +162,7 @@ const bool Cart::cpu_read(const uint16_t addr, uint8_t &data, const bool read_on
 const bool Cart::cpu_write(const uint16_t addr, const uint8_t data) {
     uint32_t mapped_addr = 0x00000000L;
     if (m_mapper->cpu_map_write_addr(addr, mapped_addr, data)) {
+        // std::cout << utils::string_format("W: $%04X -> $%04X", addr, mapped_addr) << std::endl;
         if (mapped_addr < m_prg_mem.size()) {
             m_prg_mem[mapped_addr] = data;
             return true;

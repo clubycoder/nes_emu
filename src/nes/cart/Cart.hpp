@@ -50,7 +50,7 @@ public:
     static const uint32_t CHR_BANK_SIZE = 8 * 1024;
 
     Cart(const std::string &filename);
-    Cart(const std::vector<uint8_t> &rom_memory, const uint16_t start_address);
+    Cart(const std::vector<uint8_t> &rom_memory);
     ~Cart();
 
     // Setup the mapper once the ID is known
