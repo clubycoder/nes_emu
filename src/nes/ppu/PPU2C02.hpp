@@ -54,9 +54,15 @@ public:
     const bool cpu_write(const uint16_t addr, const uint8_t data) override;
 
 public: // TODO: Change to protected
+    static const int SCREEN_WIDTH_INTERNAL = 341;
+    static const int SCREEN_HEIGHT_INTERNAL = 262;
+
     virtual void open_screen() = 0;
     virtual void close_screen() = 0;
     virtual void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) = 0;
+
+    uint16_t m_x; // cycle
+    uint16_t m_y; // scanline
 
 private:
 

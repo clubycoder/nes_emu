@@ -27,6 +27,7 @@ SDL implementation of PPU
 *******************************************************************************/
 
 #include <stdexcept>
+#include <iostream>
 #include <cstdint>
 
 #include <SDL2/SDL.h>
@@ -66,11 +67,20 @@ void PPU2C02SDL::open_screen() {
 
 void PPU2C02SDL::close_screen() {
     SDL_UnlockTexture(m_screen_texture);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderCopy(
+        m_renderer,
+        const_cast<SDL_Texture *>(get_screen_texture()),
+        NULL,
+        NULL
+    );
+    SDL_RenderPresent(m_renderer);
 }
 
 void PPU2C02SDL::set_pixel(const int x, const int y, const uint8_t r, const uint8_t g, const uint8_t b) {
     if (x > 0 && x < SCREEN_WIDTH && y > 0 && y < SCREEN_HEIGHT) {
-    uint32_t *screen_row = (uint32_t *)((uint8_t *)m_screen_pixels + y * m_screen_pitch);
+        // std::cout << "SETTING PIXELS - " << x << "," << y << " = (" << (int)r << "," << (int)g << "," << (int)b << ")" << std::endl;
+        uint32_t *screen_row = (uint32_t *)((uint8_t *)m_screen_pixels + y * m_screen_pitch);
         *(screen_row + x) = (
             0xFF000000L |
             ((uint32_t)r & 0xFF) << 16 |

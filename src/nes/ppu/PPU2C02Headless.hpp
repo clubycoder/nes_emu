@@ -23,27 +23,30 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Shared component interface
+Headless implementation of PPU
 *******************************************************************************/
 
 #pragma once
 
-namespace nes {
+#include <cstdint>
 
-class Component {
+#include <nes/ppu/PPU2C02.hpp>
+
+namespace nes { namespace ppu {
+
+class PPU2C02Headless : public PPU2C02 {
 public:
-    virtual void reset() = 0;
-
-    virtual void clock() {
-        m_clock_count++;
+    PPU2C02Headless() : PPU2C02() {
     };
+    ~PPU2C02Headless();
 
-    virtual const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) = 0;
-    virtual const bool cpu_write(const uint16_t addr, const uint8_t data) = 0;
+public: // TODO: Change to protected
+    void open_screen() override;
+    void close_screen() override;
+    void set_pixel(const int x, const int y, const uint8_t r, const uint8_t g, const uint8_t b) override;
 
-protected:
-    uint32_t m_clock_count = 0;
+private:
 
 };
 
-} // nes
+}}

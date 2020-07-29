@@ -23,27 +23,11 @@ SOFTWARE.
 *******************************************************************************/
 
 /*******************************************************************************
-Shared component interface
+Headless APU emulation
 *******************************************************************************/
 
-#pragma once
+#include <nes/apu/APURP2A03Headless.hpp>
 
-namespace nes {
+namespace nes { namespace apu {
 
-class Component {
-public:
-    virtual void reset() = 0;
-
-    virtual void clock() {
-        m_clock_count++;
-    };
-
-    virtual const bool cpu_read(const uint16_t addr, uint8_t &data, const bool read_only = false) = 0;
-    virtual const bool cpu_write(const uint16_t addr, const uint8_t data) = 0;
-
-protected:
-    uint32_t m_clock_count = 0;
-
-};
-
-} // nes
+}} // nes::apu

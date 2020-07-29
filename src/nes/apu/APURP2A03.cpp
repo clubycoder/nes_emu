@@ -40,6 +40,7 @@ void APURP2A03::reset() {
 }
 
 void APURP2A03::clock() {
+    Component::clock();
 }
 
 const bool APURP2A03::cpu_read(const uint16_t addr, uint8_t &data, const bool read_only) {

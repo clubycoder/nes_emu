@@ -67,6 +67,8 @@ void CPU2A03::reset() {
 }
 
 void CPU2A03::clock() {
+    Component::clock();
+
     // make sure we have used up the current instruction's cycles before moving on to the next
     if (m_instr_state.cycles == 0) {
         // std::cout << *this << std::endl;

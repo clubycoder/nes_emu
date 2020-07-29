@@ -28,6 +28,8 @@ the components
 *******************************************************************************/
 
 #include <memory>
+#include <chrono>
+#include <thread>
 
 #include <nes/Bus.hpp>
 
@@ -49,17 +51,40 @@ void Bus::reset() {
     if (m_apu != nullptr) {
         m_apu->reset();
     }
+
+    m_clock_check_count = 0;
+    m_clock_check_last_timestamp = std::chrono::high_resolution_clock::now();
 }
 
 void Bus::clock() {
+    Component::clock();
+
     // Clock the PPU
     m_ppu->clock();
 
     // Clock the APU
     m_apu->clock();
 
-    // TODO: Changed to 1/3 of PPU
-    m_cpu->clock();
+    // 1/3 of PPU and APU speeds
+    if (m_clock_count % 3 == 0) {
+        // m_cpu->clock();
+    }
+
+    // Throttle clock speed
+    m_clock_check_count++;
+    if (m_clock_check_count > CLOCK_CHECK_AFTER_COUNT) {
+        auto clock_check_timestamp = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> clock_check_diff = clock_check_timestamp - m_clock_check_last_timestamp;
+        std::chrono::duration<double, std::milli> clock_check_expected(CLOCK_CHECK_AFTER_EXPECTED);
+        std::chrono::duration<double, std::milli> clock_check_remaining = clock_check_expected - clock_check_diff;
+
+        // TODO: Work in a sleep
+        // std::cout << std::string("Sleeping for: ") << clock_check_remaining.count() << "ms" << std::endl;
+        // std::this_thread::sleep_for(clock_check_remaining);
+
+        m_clock_check_count = 0;
+        m_clock_check_last_timestamp = clock_check_timestamp;
+    }
 }
 
 void Bus::load_cart(std::shared_ptr<nes::cart::Cart> cart) {
